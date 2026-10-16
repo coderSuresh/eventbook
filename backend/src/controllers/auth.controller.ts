@@ -51,22 +51,20 @@ export class AuthController {
 
     static async login(req: Request, res: Response) {
         try {
-            const { email, password } = req.body;
+            const { email, password } = req.body || {};
 
             const user = await db.orm.public.User.where({
                 email: email,
             }).first();
 
             if (!user) {
-                res.status(401).json({ message: "Invalid email or password" });
-                return;
+                return res.status(401).json({ message: "Invalid email or password" });
             }
 
             const isPasswordValid = await bcrypt.compare(password, user.password);
 
             if (!isPasswordValid) {
-                res.status(401).json({ message: "Invalid email or password" });
-                return;
+                return res.status(401).json({ message: "Invalid email or password" });
             }
 
             const token = AuthController.generateJwtToken(user.id, user.email);
@@ -75,45 +73,40 @@ export class AuthController {
 
         } catch (error) {
             console.error("Error during login:", error);
-            res.status(500).json({ message: "Internal server error" });
+            return res.status(500).json({ message: "Internal server error" });
         }
     }
 
     static async register(req: Request, res: Response) {
         try {
-            const { name, email, password } = req.body;
+            const { name, email, password } = req.body || {};
 
             const existingUser = await db.orm.public.User.where({
                 email: email,
             }).first();
 
             if (existingUser) {
-
                 if (existingUser.isVerified) {
-                    res.status(400).json({ message: "Email already exists" });
-                    return;
+                    return res.status(400).json({ message: "Email already exists" });
                 }
 
                 if (existingUser.token) {
-                    res.status(400).json({ message: "Email already exists. Check your email for a verification link." });
-                    return;
+                    return res.status(400).json({ message: "Email already exists. Check your email for a verification link." });
                 }
 
                 const token = AuthController.generateRandomToken(email);
-                AuthController.sendVerificationEmail(email, token);
 
                 await db.orm.public.User.where({ id: existingUser.id }).update({
                     token,
                 });
 
-                res.status(400).json({ message: "Email already exists. Check your email for a verification link." });
-                return;
+                await AuthController.sendVerificationEmail(email, token);
+
+                return res.status(400).json({ message: "Email already exists. Check your email for a verification link." });
             }
 
             const hashedPassword = await bcrypt.hash(password, 10);
-
             const token = AuthController.generateRandomToken(email);
-            AuthController.sendVerificationEmail(email, token);
 
             const newUser = await db.orm.public.User.create({
                 name,
@@ -122,10 +115,12 @@ export class AuthController {
                 token,
             });
 
-            res.status(201).json({ message: "User registered successfully", newUser });
+            await AuthController.sendVerificationEmail(email, token);
+
+            return res.status(201).json({ message: "User registered successfully", newUser });
         } catch (error) {
             console.error("Error during registration:", error);
-            res.status(500).json({ message: "Internal server error" });
+            return res.status(500).json({ message: "Internal server error" });
         }
     }
 
@@ -134,8 +129,7 @@ export class AuthController {
             const { token } = req.query;
 
             if (!token || typeof token !== "string") {
-                res.status(400).json({ message: "Invalid token" });
-                return;
+                return res.status(400).json({ message: "Invalid token" });
             }
 
             const user = await db.orm.public.User.where({
@@ -143,8 +137,7 @@ export class AuthController {
             }).first();
 
             if (!user) {
-                res.status(400).json({ message: "Invalid token" });
-                return;
+                return res.status(400).json({ message: "Invalid token" });
             }
 
             user.isVerified = true;
@@ -155,7 +148,7 @@ export class AuthController {
             res.json({ message: "Email verified successfully" });
         } catch (error) {
             console.error("Error during email verification:", error);
-            res.status(500).json({ message: "Internal server error" });
+            return res.status(500).json({ message: "Internal server error" });
         }
     }
 }
