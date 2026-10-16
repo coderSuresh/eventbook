@@ -1,0 +1,18 @@
+// use prisma-8
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id         String                     @id @default(cuid(2))
+  name       String
+  email      String                     @unique
+  password   String
+  role       Role                       @default(USER)
+  isActive   Boolean                    @default(true)
+  isVerified Boolean                    @default(false)
+  token      String?                    @unique
+  createdAt  TimestamptzString          @default(now())
+  updatedAt  temporal.updatedAtString()
+}
