@@ -67,6 +67,22 @@ export class AuthController {
                 return res.status(401).json({ message: "Invalid email or password" });
             }
 
+            if (!user.isVerified) {
+                if (user.token) {
+                    return res.status(401).json({ message: "Email not verified. Check your email for a verification link." });
+                }
+
+                const token = AuthController.generateRandomToken(email);
+
+                await db.orm.public.User.where({ id: user.id }).update({
+                    token,
+                });
+
+                await AuthController.sendVerificationEmail(email, token);
+
+                return res.status(401).json({ message: "Email not verified. Check your email for a verification link." });
+            }
+
             const token = AuthController.generateJwtToken(user.id, user.email);
 
             res.json({ token });
