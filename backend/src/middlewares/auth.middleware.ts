@@ -1,14 +1,9 @@
 import jwt from "jsonwebtoken";
-import type { Request, Response, NextFunction } from "express";
+import type { Response, NextFunction } from "express";
+import type { AuthenticatedRequest } from "../types";
+import { db } from "../prisma/db";
 
-interface AuthenticatedRequest extends Request {
-    user?: {
-        userId: string;
-        role: string;
-    };
-}
-
-const authenticateJwt = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const authenticateJwt = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -19,7 +14,14 @@ const authenticateJwt = (req: AuthenticatedRequest, res: Response, next: NextFun
 
     try {
         const decoded = jwt.verify(token, process.env["JWT_SECRET"] || "") as { userId: string; role: string };
-        req.user = decoded;
+
+        const user = await db.orm.public.User.where({ id: decoded.userId }).first();
+
+        if (!user) {
+            return res.status(401).json({ message: "User not found" });
+        }
+
+        req.user = { userId: user.id, role: user.role };
         next();
     } catch (error) {
         return res.status(401).json({ message: "Invalid or expired token" });
