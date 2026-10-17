@@ -16,3 +16,33 @@ model User {
   createdAt  TimestamptzString          @default(now())
   updatedAt  temporal.updatedAtString()
 }
+
+model Event {
+  id                 String                     @id @default(cuid(2))
+  title              String
+  description        String
+  date               TimestamptzString
+  totalSeats         Int
+  isActive           Boolean                    @default(true)
+  cancellationReason String?
+  venue              String
+  createdAt          TimestamptzString          @default(now())
+  updatedAt          temporal.updatedAtString()
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+model Booking {
+  id        String                     @id @default(cuid(2))
+  userId    String
+  eventId   String
+  status    BookingStatus              @default(CONFIRMED)
+  createdAt TimestamptzString          @default(now())
+  updatedAt temporal.updatedAtString()
+
+  user      User                       @relation(fields: [userId], references: [id])
+  event     Event                      @relation(fields: [eventId], references: [id])
+}
