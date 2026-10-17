@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { z }  from 'zod';
+import { z } from 'zod';
 
 const validateBody = (schema: z.ZodType) => {
     return (req: Request, res: Response, next: NextFunction) => {
@@ -19,4 +19,4 @@ const validateBody = (schema: z.ZodType) => {
     }
 };
 
-export default validateBody;
+export { validateBody };
