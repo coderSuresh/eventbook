@@ -9,8 +9,8 @@ const FRONTEND_URL = process.env["CORS_ORIGIN"] || "http://localhost:3000";
 
 export class AuthController {
 
-    private static generateJwtToken(userId: string, email: string): string {
-        const payload = { userId, email };
+    private static generateJwtToken(userId: string, role: string): string {
+        const payload = { userId, role };
         const secretKey = process.env["JWT_SECRET"];
 
         if (!secretKey) {
@@ -83,7 +83,7 @@ export class AuthController {
                 return res.status(401).json({ message: "Email not verified. Check your email for a verification link." });
             }
 
-            const token = AuthController.generateJwtToken(user.id, user.email);
+            const token = AuthController.generateJwtToken(user.id, user.role);
 
             res.json({ token });
 
