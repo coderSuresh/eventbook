@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import "dotenv/config";
 import apiRouter from "./routes"
 import { authenticateJwt, authorizeRoles } from "./middlewares/auth.middleware";
@@ -14,6 +15,7 @@ app.use(cors({
 }))
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/status", (_, res) => {
     res.json({ status: "ok" });

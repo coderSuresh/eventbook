@@ -321,6 +321,13 @@
                   "kind": "scalar"
                 }
               },
+              "refreshTokenHash": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "role": {
                 "nullable": false,
                 "type": {
@@ -372,6 +379,9 @@
                 },
                 "password": {
                   "column": "password"
+                },
+                "refreshTokenHash": {
+                  "column": "refreshTokenHash"
                 },
                 "role": {
                   "column": "role"
@@ -651,6 +661,11 @@
                   "dataType": "pg/text",
                   "nullable": false
                 },
+                "refreshTokenHash": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
                 "role": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
@@ -719,7 +734,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "b772c73e83cd160ad6595340ec145b9c81ce6dfc53ec352b34b70cd5020a67b9"
+    "storageHash": "c53e35663b1179fd4f1802076b7903979c3f4cad89ae5be753588a8591fda3ec"
   },
   "execution": {
     "executionHash": "b6279418b7911d18991f33076dd9e4e601dd73bd2698bcd5e7d0b6d35aa9afe1",

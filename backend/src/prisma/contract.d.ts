@@ -18,7 +18,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'b772c73e83cd160ad6595340ec145b9c81ce6dfc53ec352b34b70cd5020a67b9'>;
+  StorageHashBase<'c53e35663b1179fd4f1802076b7903979c3f4cad89ae5be753588a8591fda3ec'>;
 export type ExecutionHash =
   ExecutionHashBase<'b6279418b7911d18991f33076dd9e4e601dd73bd2698bcd5e7d0b6d35aa9afe1'>;
 export type ProfileHash =
@@ -262,6 +262,7 @@ export type FieldOutputTypes = {
       readonly isVerified: CodecTypes['pg/bool@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly password: CodecTypes['pg/text@1']['output'];
+      readonly refreshTokenHash: CodecTypes['pg/text@1']['output'] | null;
       readonly role: 'USER' | 'ADMIN';
       readonly token: CodecTypes['pg/text@1']['output'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -298,6 +299,7 @@ export type FieldInputTypes = {
       readonly isVerified: CodecTypes['pg/bool@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly password: CodecTypes['pg/text@1']['input'];
+      readonly refreshTokenHash: CodecTypes['pg/text@1']['input'] | null;
       readonly role: 'USER' | 'ADMIN';
       readonly token: CodecTypes['pg/text@1']['input'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
@@ -334,6 +336,7 @@ export type StorageColumnTypes = {
       readonly isVerified: CodecTypes['pg/bool@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly password: CodecTypes['pg/text@1']['output'];
+      readonly refreshTokenHash: CodecTypes['pg/text@1']['output'] | null;
       readonly role: 'USER' | 'ADMIN';
       readonly token: CodecTypes['pg/text@1']['output'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -370,6 +373,7 @@ export type StorageColumnInputTypes = {
       readonly isVerified: CodecTypes['pg/bool@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly password: CodecTypes['pg/text@1']['input'];
+      readonly refreshTokenHash: CodecTypes['pg/text@1']['input'] | null;
       readonly role: 'USER' | 'ADMIN';
       readonly token: CodecTypes['pg/text@1']['input'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
@@ -410,6 +414,7 @@ export namespace Models {
     isVerified: CodecTypes['pg/bool@1']['output'];
     name: CodecTypes['pg/text@1']['output'];
     password: CodecTypes['pg/text@1']['output'];
+    refreshTokenHash: CodecTypes['pg/text@1']['output'] | null;
     role: 'USER' | 'ADMIN';
     token: CodecTypes['pg/text@1']['output'] | null;
     updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -663,6 +668,12 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly many: false;
                 };
+                readonly refreshTokenHash: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
                 readonly role: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
@@ -895,6 +906,10 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly refreshTokenHash: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly role: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -923,6 +938,7 @@ type ContractBase = Omit<
                 readonly isVerified: { readonly column: 'isVerified' };
                 readonly name: { readonly column: 'name' };
                 readonly password: { readonly column: 'password' };
+                readonly refreshTokenHash: { readonly column: 'refreshTokenHash' };
                 readonly role: { readonly column: 'role' };
                 readonly token: { readonly column: 'token' };
                 readonly updatedAt: { readonly column: 'updatedAt' };

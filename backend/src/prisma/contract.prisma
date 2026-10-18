@@ -5,16 +5,17 @@ enum Role {
 }
 
 model User {
-  id         String                     @id @default(cuid(2))
-  name       String
-  email      String                     @unique
-  password   String
-  role       Role                       @default(USER)
-  isActive   Boolean                    @default(true)
-  isVerified Boolean                    @default(false)
-  token      String?                    @unique
-  createdAt  TimestamptzString          @default(now())
-  updatedAt  temporal.updatedAtString()
+  id               String                     @id @default(cuid(2))
+  name             String
+  email            String                     @unique
+  password         String
+  role             Role                       @default(USER)
+  isActive         Boolean                    @default(true)
+  isVerified       Boolean                    @default(false)
+  token            String?                    @unique
+  refreshTokenHash String?
+  createdAt        TimestamptzString          @default(now())
+  updatedAt        temporal.updatedAtString()
 }
 
 model Event {

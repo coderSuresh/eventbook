@@ -20,7 +20,11 @@ const authenticateJwt = async (req: AuthenticatedRequest, res: Response, next: N
             throw new Error("JWT_SECRET is not defined in environment variables");
         }
 
-        const decoded = jwt.verify(token, secret) as { userId: string; role: string };
+        const decoded = jwt.verify(token, secret) as { userId: string; role: string; type?: string };
+
+        if (decoded.type !== "access") {
+            return res.status(401).json({ message: "Invalid access token" });
+        }
 
         const user = await db.orm.public.User.where({ id: decoded.userId }).first();
 

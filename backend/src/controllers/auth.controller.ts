@@ -4,25 +4,35 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Resend } from "resend";
 import crypto from "crypto";
+import { REFRESH_TOKEN_COOKIE, refreshCookieOptions } from "../constants/auth";
 
 const FRONTEND_URL = process.env["CORS_ORIGIN"] || "http://localhost:3000";
 
 export class AuthController {
 
     private static generateJwtToken(userId: string, role: string): string {
-        const payload = { userId, role };
         const secretKey = process.env["JWT_SECRET"];
 
         if (!secretKey) {
             throw new Error("JWT_SECRET is not defined");
         }
 
-        // for demo purpose
-        // better if aToken with short ttl and rToken with long ttl used
-        // with axios interceptor to refresh the token when expired
-
-        const token = jwt.sign(payload, secretKey, { expiresIn: "1d" });
+        const token = jwt.sign({ userId, role, type: "access" }, secretKey, { expiresIn: "15m" });
         return token;
+    }
+
+    private static generateRefreshToken(userId: string, role: string): string {
+        const secretKey = process.env["JWT_SECRET"];
+
+        if (!secretKey) {
+            throw new Error("JWT_SECRET is not defined");
+        }
+
+        return jwt.sign({ userId, role, type: "refresh" }, secretKey, { expiresIn: "7d" });
+    }
+
+    private static hashRefreshToken(token: string): string {
+        return crypto.createHash("sha256").update(token).digest("hex");
     }
 
     private static generateRandomToken(email: string): string {
@@ -84,6 +94,13 @@ export class AuthController {
             }
 
             const token = AuthController.generateJwtToken(user.id, user.role);
+            const refreshToken = AuthController.generateRefreshToken(user.id, user.role);
+
+            await db.orm.public.User.where({ id: user.id }).update({
+                refreshTokenHash: AuthController.hashRefreshToken(refreshToken),
+            });
+
+            res.cookie(REFRESH_TOKEN_COOKIE, refreshToken, refreshCookieOptions);
 
             res.json({ token });
 
@@ -91,6 +108,49 @@ export class AuthController {
             console.error("Error during login:", error);
             return res.status(500).json({ message: "Internal server error" });
         }
+    }
+
+    static async refresh(req: Request, res: Response) {
+        try {
+            const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE];
+
+            if (!refreshToken) {
+                return res.status(401).json({ message: "Refresh token missing" });
+            }
+
+            const secretKey = process.env["JWT_SECRET"];
+            if (!secretKey) {
+                throw new Error("JWT_SECRET is not defined");
+            }
+
+            const decoded = jwt.verify(refreshToken, secretKey) as { userId: string; role: string; type?: string };
+            if (decoded.type !== "refresh") {
+                return res.status(401).json({ message: "Invalid refresh token" });
+            }
+
+            const user = await db.orm.public.User.where({ id: decoded.userId }).first();
+            const refreshTokenHash = AuthController.hashRefreshToken(refreshToken);
+
+            if (!user || !user.isActive || user.refreshTokenHash !== refreshTokenHash) {
+                return res.status(401).json({ message: "Invalid refresh token" });
+            }
+
+            const nextRefreshToken = AuthController.generateRefreshToken(user.id, user.role);
+            await db.orm.public.User.where({ id: user.id }).update({
+                refreshTokenHash: AuthController.hashRefreshToken(nextRefreshToken),
+            });
+
+            res.cookie(REFRESH_TOKEN_COOKIE, nextRefreshToken, refreshCookieOptions);
+            return res.json({ token: AuthController.generateJwtToken(user.id, user.role) });
+        } catch (error) {
+            console.error("Error refreshing access token:", error);
+            return res.status(401).json({ message: "Invalid or expired refresh token" });
+        }
+    }
+
+    static logout(_: Request, res: Response) {
+        res.clearCookie(REFRESH_TOKEN_COOKIE, refreshCookieOptions);
+        return res.json({ message: "Logged out successfully" });
     }
 
     static async register(req: Request, res: Response) {
