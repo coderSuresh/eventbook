@@ -13,7 +13,14 @@ const authenticateJwt = async (req: AuthenticatedRequest, res: Response, next: N
     const token = authHeader.split(" ")[1]!;
 
     try {
-        const decoded = jwt.verify(token, process.env["JWT_SECRET"] || "") as { userId: string; role: string };
+
+        const secret = process.env["JWT_SECRET"];
+
+        if (!secret) {
+            throw new Error("JWT_SECRET is not defined in environment variables");
+        }
+
+        const decoded = jwt.verify(token, secret) as { userId: string; role: string };
 
         const user = await db.orm.public.User.where({ id: decoded.userId }).first();
 
