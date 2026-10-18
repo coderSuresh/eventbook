@@ -1,1 +1,213 @@
-# EventBook - Simple Event Booking App
+# EventBook
+
+EventBook is a small event booking application with a separate Next.js frontend and Express REST API.
+
+## Current Status
+
+Implemented in the repository:
+
+- Upcoming event listing from the REST API with server-side `page` and `pageSize` pagination.
+- Event detail and booking confirmation pages.
+- Registration and login UI.
+- Bearer access tokens kept in memory, with refresh-token rotation through an `HttpOnly` cookie.
+- Backend booking transaction with row locking to protect the last available seat.
+- Admin-protected event create, update, delete, and attendee-list API routes.
+- User booking-list and cancellation API routes.
+
+Not currently included:
+
+- Live deployment URLs.
+- A seed script and committed test accounts.
+- Automated backend tests.
+- Admin frontend screens.
+- Frontend search, pagination controls, booking history, and cancellation screens.
+
+These are listed as gaps rather than represented as completed features.
+
+## Repository Layout
+
+```text
+backend/    Express API, Prisma 8 contract, authentication, event and booking rules
+frontend/   Next.js App Router frontend and Axios service layer
+```
+
+The frontend and backend run separately. The frontend calls the backend API; database access is contained in the backend.
+
+## Tech Stack
+
+### Frontend
+
+- Next.js `16.4.2` with the App Router
+- React `19.3.0`
+- TypeScript
+- Tailwind CSS `4`
+- Axios
+
+### Backend
+
+- Node.js with Express `5.3.0`
+- TypeScript
+- Prisma `8` ORM PostgreSQL contract
+- PostgreSQL through `DATABASE_URL`
+- Zod request validation
+- bcrypt password hashing
+- JWT access and refresh tokens
+- `cookie-parser` and CORS
+- Resend for verification email delivery
+
+## Run Locally
+
+### Backend
+
+Requirements: Node.js, PostgreSQL, and a database matching the `DATABASE_URL`.
+
+```bash
+cd backend
+npm install
+copy .env.example .env
+```
+
+Set the values in `backend/.env`:
+
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/eventbook"
+PORT=8000
+CORS_ORIGIN=http://localhost:3000
+JWT_SECRET=replace-with-a-long-random-secret
+RESEND_API_KEY=replace-with-a-resend-key
+```
+
+Apply the Prisma 8 contract to the database, then start the API:
+
+```bash
+npm run contract:emit
+npx prisma db update
+npm run dev
+```
+
+The API runs at `http://localhost:8000` by default. Its health endpoint is `GET /status`.
+
+For a production-style backend run:
+
+```bash
+npm run build
+npm start
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+```
+
+Create `frontend/.env`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+```
+
+Start the frontend:
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:3000`.
+
+Frontend checks:
+
+```bash
+npm run lint
+npm run build
+```
+
+There is currently no seed command or automated test command in either package.
+
+## Frontend Routes
+
+| Route | Purpose |
+| --- | --- |
+| `/` | Homepage with the first page of upcoming events |
+| `/events/[id]` | Event title, date, time, venue, description, and booking link |
+| `/events/[id]/book` | Protected booking confirmation page |
+| `/login` | Login form |
+| `/register` | Registration form |
+
+The Next.js `proxy.ts` protects `/events/[id]/book` when the refresh-session cookie is absent. The backend still performs the authoritative authentication check, so the proxy is only a navigation guard.
+
+## API
+
+The API base path is `/api/v1`.
+
+### Authentication
+
+| Method | Endpoint | Auth | Purpose |
+| --- | --- | --- | --- |
+| `POST` | `/auth/register` | Public | Register a user and start email verification |
+| `POST` | `/auth/login` | Public | Verify credentials and return an access token |
+| `POST` | `/auth/refresh` | Refresh cookie | Rotate the refresh token and return a new access token |
+| `POST` | `/auth/logout` | Public | Clear the refresh-token cookie |
+| `GET` | `/auth/verify?token=...` | Public | Verify a registration email |
+
+Access tokens are sent in the `Authorization: Bearer <token>` header. The refresh token is stored as an `HttpOnly`, `SameSite=Lax` cookie. The backend stores only its SHA-256 hash in `User.refreshTokenHash` and rotates the token on refresh.
+
+### Events
+
+| Method | Endpoint | Auth | Purpose |
+| --- | --- | --- | --- |
+| `GET` | `/events/upcoming?page=1&pageSize=10` | Public | Return active future events and pagination metadata |
+| `GET` | `/events/search?query=...` | Public | Search active events by title |
+| `GET` | `/events/:id` | Public | Return one event |
+| `GET` | `/events` | Public | Return all events |
+| `POST` | `/events` | Admin | Create an event |
+| `PUT` | `/events/:id` | Admin | Update an event |
+| `DELETE` | `/events/:id` | Admin | Delete or cancel an event |
+
+`/events/upcoming` returns an object with `data` and `pagination`. `pageSize` is capped at 50 by the backend.
+
+### Bookings
+
+| Method | Endpoint | Auth | Purpose |
+| --- | --- | --- | --- |
+| `POST` | `/booking` | User or admin | Create or restore one confirmed booking for an event |
+| `GET` | `/booking/user` | User or admin | List the authenticated user's bookings |
+| `DELETE` | `/booking/:bookingId` | User or admin | Cancel the authenticated user's confirmed booking |
+| `GET` | `/booking/event/:eventId` | Admin | List bookings for an event |
+
+## Data Model
+
+- `User`: credentials, role (`USER` or `ADMIN`), email verification token, active state, and refresh-token hash.
+- `Event`: title, text description, timestamp, venue, total seats, active state, and optional cancellation reason.
+- `Booking`: user/event relationship, status (`CONFIRMED` or `CANCELLED`), and timestamps.
+
+Seats are calculated from confirmed bookings compared with `Event.totalSeats`. Booking creation locks the event row inside a database transaction before checking capacity and writing the booking. The schema also has a partial unique index for one confirmed booking per user and event.
+
+## Backend Rules
+
+- A confirmed duplicate booking returns the existing booking instead of creating another one.
+- A cancelled booking can be restored if the event still has capacity.
+- Past or inactive events cannot be booked.
+- A booking can only be cancelled by its owning user.
+- Past-event bookings cannot be cancelled.
+- Full events return a conflict response instead of overbooking.
+- Admin event updates reject a seat total below the number of existing bookings.
+- Deleting an event with no bookings removes it. Deleting an event with bookings soft-cancels it by setting `isActive` to `false` and recording the cancellation reason.
+- Admin-only routes require a verified JWT with the `ADMIN` role.
+
+## Security and Validation
+
+- Passwords are hashed with bcrypt.
+- Login and registration payloads are validated with Zod on the backend.
+- Protected routes validate the access-token type and role server-side.
+- Refresh tokens are rotated and stored only as hashes in the database.
+- Secrets are read from environment variables; `.env` is ignored by Git.
+- Backend errors return JSON messages without stack traces.
+
+## Test Accounts, Deployment, and Tests
+
+No deployment URL or test account is currently committed. There is also no seed script or automated test suite in this repository yet. They will soon be added.
+
+## AI Usage
+
+GitHub Copilot was used to assist with code auto complete, and this README, Google stitch for UI inspiration generation.
