@@ -21,9 +21,9 @@ const Footer = () => {
             <p className="m-0 text-sm text-muted">&copy; {getCurrentYear()} EventBook. All rights reserved.</p>
             <Link
                 className="text-xs font-semibold text-foreground no-underline hover:text-accent-dark"
-                href="#top"
+                href="#"
             >
-                Back to top
+               Privacy Policy
             </Link>
         </footer>
     )
