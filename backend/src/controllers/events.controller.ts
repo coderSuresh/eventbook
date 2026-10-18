@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { db } from "../prisma/db";
+import { db } from "../prisma/db.js";
 
 export class EventsController {
     static async getAllEvents(_: Request, res: Response) {
@@ -17,17 +17,17 @@ export class EventsController {
             const requestedPage = Number(req.query["page"] ?? 1);
             const requestedPageSize = Number(req.query["pageSize"] ?? 10);
             const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-          
+
             const pageSize = Number.isInteger(requestedPageSize) && requestedPageSize > 0
                 ? Math.min(requestedPageSize, 50)
                 : 10;
-            
+
             const offset = (page - 1) * pageSize;
 
             const upcomingEventsQuery = db.orm.public.Event
                 .where(q => q.date.gte(new Date().toISOString()))
                 .where({ isActive: true });
-            
+
             const { count: total } = await upcomingEventsQuery.aggregate((aggregate) => ({
                 count: aggregate.count(),
             }));
@@ -37,7 +37,7 @@ export class EventsController {
                 .limit(pageSize)
                 .offset(offset)
                 .all();
-            
+
             const totalPages = Math.ceil(total / pageSize);
 
             return res.status(200).json({

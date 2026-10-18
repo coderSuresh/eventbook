@@ -1,8 +1,8 @@
 import express from "express";
-import { BookingController } from "../controllers/booking.controller";
-import { validateBody } from "../middlewares/validate-body.middleware";
-import { createBookingSchema } from "../zod-schemas/booking.schema";
-import { authenticateJwt, authorizeRoles } from "../middlewares/auth.middleware";
+import { BookingController } from "../controllers/booking.controller.js";
+import { validateBody } from "../middlewares/validate-body.middleware.js";
+import { createBookingSchema } from "../zod-schemas/booking.schema.js";
+import { authenticateJwt, authorizeRoles } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 

@@ -2,8 +2,8 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
-import apiRouter from "./routes"
-import { authenticateJwt, authorizeRoles } from "./middlewares/auth.middleware";
+import apiRouter from "./routes/index.js";
+import { authenticateJwt, authorizeRoles } from "./middlewares/auth.middleware.js";
 
 const PORT = process.env["PORT"] || 3000;
 

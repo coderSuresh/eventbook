@@ -1,8 +1,8 @@
 import express from "express";
-import { EventsController } from "../controllers/events.controller";
-import { validateBody } from "../middlewares/validate-body.middleware";
-import { createEventSchema, deleteEventSchema } from "../zod-schemas/event.schema";
-import { authenticateJwt, authorizeRoles } from "../middlewares/auth.middleware";
+import { EventsController } from "../controllers/events.controller.js";
+import { validateBody } from "../middlewares/validate-body.middleware.js";
+import { createEventSchema, deleteEventSchema } from "../zod-schemas/event.schema.js";
+import { authenticateJwt, authorizeRoles } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 

@@ -1,7 +1,7 @@
 import express from "express";
-import authRoutes from "./auth.route";
-import eventRoutes from "./events.route";
-import bookingRoutes from "./booking.route";
+import authRoutes from "./auth.route.js";
+import eventRoutes from "./events.route.js";
+import bookingRoutes from "./booking.route.js";
 
 const router = express.Router();
 

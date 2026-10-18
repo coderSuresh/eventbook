@@ -1,7 +1,7 @@
 import express from "express";
-import { AuthController } from "../controllers/auth.controller";
-import { validateBody } from "../middlewares/validate-body.middleware";
-import { loginSchema, registerSchema } from "../zod-schemas/auth.schema";
+import { AuthController } from "../controllers/auth.controller.js";
+import { loginSchema, registerSchema } from "../zod-schemas/auth.schema.js";
+import { validateBody } from "../middlewares/validate-body.middleware.js";
 
 const router = express.Router();
 

@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import type { Response, NextFunction } from "express";
-import type { AuthenticatedRequest } from "../types";
-import { db } from "../prisma/db";
+import type { AuthenticatedRequest } from "../types/index.js";
+import { db } from "../prisma/db.js";
 
 const authenticateJwt = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;

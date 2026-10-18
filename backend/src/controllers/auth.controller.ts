@@ -1,10 +1,10 @@
 import type { Request, Response } from "express";
-import { db } from "../prisma/db";
+import { db } from "../prisma/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Resend } from "resend";
 import crypto from "crypto";
-import { REFRESH_TOKEN_COOKIE, refreshCookieOptions } from "../constants/auth";
+import { REFRESH_TOKEN_COOKIE, refreshCookieOptions } from "../constants/auth.js";
 
 const FRONTEND_URL = process.env["CORS_ORIGIN"] || "http://localhost:3000";
 

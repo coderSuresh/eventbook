@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import { db } from "../prisma/db";
-import type { AuthenticatedRequest } from "../types";
+import { db } from "../prisma/db.js";
+import type { AuthenticatedRequest } from "../types/index.js";
 
 export class BookingController {
     static async getBookingsByEventId(req: Request, res: Response) {
