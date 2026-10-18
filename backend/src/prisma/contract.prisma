@@ -45,4 +45,6 @@ model Booking {
 
   user      User                       @relation(fields: [userId], references: [id])
   event     Event                      @relation(fields: [eventId], references: [id])
+
+  @@index([userId, eventId], where: sql"status = 'CONFIRMED'", unique: true, name: "unique_booking_per_user_per_event")
 }

@@ -506,6 +506,16 @@
                   "name": "Booking_userId_idx_a489d58a",
                   "prefix": "Booking_userId_idx",
                   "unique": false
+                },
+                {
+                  "columns": [
+                    "userId",
+                    "eventId"
+                  ],
+                  "name": "unique_booking_per_user_per_event_8aa21da3",
+                  "prefix": "unique_booking_per_user_per_event",
+                  "unique": true,
+                  "where": "status = 'CONFIRMED'"
                 }
               ],
               "primaryKey": {
@@ -709,7 +719,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "1b131e26bfa97d1f2f34e244b8c05b50c0ddb3672a4f613a12de791f59ca1798"
+    "storageHash": "b772c73e83cd160ad6595340ec145b9c81ce6dfc53ec352b34b70cd5020a67b9"
   },
   "execution": {
     "executionHash": "b6279418b7911d18991f33076dd9e4e601dd73bd2698bcd5e7d0b6d35aa9afe1",
