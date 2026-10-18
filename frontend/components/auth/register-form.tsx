@@ -1,6 +1,6 @@
 "use client";
 
-import type { FormEvent } from "react";
+import type { ChangeEvent } from "react";
 import PasswordField from "@/components/auth/password-field";
 import type { RegisterCredentials } from "@/services/auth.service";
 
@@ -12,7 +12,7 @@ type RegisterFormProps = {
 };
 
 export default function RegisterForm({ error, success, isSubmitting, onSubmit }: RegisterFormProps) {
-    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: ChangeEvent<HTMLFormElement>) {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
 

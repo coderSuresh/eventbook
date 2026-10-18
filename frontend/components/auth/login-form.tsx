@@ -1,6 +1,6 @@
 "use client";
 
-import type { FormEvent } from "react";
+import type { ChangeEvent } from "react";
 import PasswordField from "@/components/auth/password-field";
 import type { LoginCredentials } from "@/services/auth.service";
 
@@ -11,7 +11,7 @@ type LoginFormProps = {
 };
 
 export default function LoginForm({ error, isSubmitting, onSubmit }: LoginFormProps) {
-    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: ChangeEvent<HTMLFormElement>) {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         await onSubmit({ email: String(formData.get("email")), password: String(formData.get("password")) });
