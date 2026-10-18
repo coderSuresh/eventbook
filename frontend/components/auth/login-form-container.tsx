@@ -16,8 +16,11 @@ export default function LoginFormContainer() {
 
         try {
             await login(credentials);
-            router.push("/");
-            router.refresh();
+            const redirect = new URLSearchParams(window.location.search).get("redirect");
+            const destination = redirect?.startsWith("/") && !redirect.startsWith("//")
+                ? redirect
+                : "/";
+            router.replace(destination);
         } catch (submissionError) {
             setError(getAuthErrorMessage(submissionError));
         } finally {
