@@ -6,9 +6,11 @@ import { authenticateJwt, authorizeRoles } from "../middlewares/auth.middleware"
 
 const router = express.Router();
 
-const { getAllEvents, getEventById, createEvent, updateEvent, deleteEvent } = EventsController;
+const { getAllEvents, getUpcomingEvents, searchEvents, getEventById, createEvent, updateEvent, deleteEvent } = EventsController;
 
 router.get("/", getAllEvents);
+router.get("/upcoming", getUpcomingEvents);
+router.get("/search", searchEvents);
 router.get("/:id", getEventById);
 
 router.post("/", authenticateJwt, authorizeRoles("ADMIN"), validateBody(createEventSchema), createEvent);

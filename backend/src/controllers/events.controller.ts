@@ -12,6 +12,73 @@ export class EventsController {
         }
     }
 
+    static async getUpcomingEvents(req: Request, res: Response) {
+        try {
+            const requestedPage = Number(req.query["page"] ?? 1);
+            const requestedPageSize = Number(req.query["pageSize"] ?? 10);
+            const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+          
+            const pageSize = Number.isInteger(requestedPageSize) && requestedPageSize > 0
+                ? Math.min(requestedPageSize, 50)
+                : 10;
+            
+            const offset = (page - 1) * pageSize;
+
+            const upcomingEventsQuery = db.orm.public.Event
+                .where(q => q.date.gte(new Date().toISOString()))
+                .where({ isActive: true });
+            
+            const { count: total } = await upcomingEventsQuery.aggregate((aggregate) => ({
+                count: aggregate.count(),
+            }));
+
+            const upcomingEvents = await upcomingEventsQuery
+                .orderBy((event) => event.date.asc())
+                .limit(pageSize)
+                .offset(offset)
+                .all();
+            
+            const totalPages = Math.ceil(total / pageSize);
+
+            return res.status(200).json({
+                data: upcomingEvents,
+                pagination: {
+                    page,
+                    pageSize,
+                    total,
+                    totalPages,
+                    hasNextPage: page < totalPages,
+                    hasPreviousPage: page > 1,
+                },
+            });
+        } catch (error) {
+            console.error("Error fetching upcoming events:", error);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
+    static async searchEvents(req: Request, res: Response) {
+        try {
+            const { query } = req.query;
+
+            if (!query || typeof query !== "string" || !query.trim()) {
+                return res.status(400).json({ message: "Invalid search query" });
+            }
+
+            console.log(`%${query}%`);
+
+            const events = await db.orm.public.Event
+                .where({ isActive: true })
+                .where(q => q.title.ilike(`%${query}%`))
+                .all();
+
+            return res.status(200).json(events);
+        } catch (error) {
+            console.error("Error searching events:", error);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
     static async getEventById(req: Request, res: Response) {
         try {
             const { id } = req.params;
