@@ -1,4 +1,11 @@
 import Link from "next/link"
+import { cacheLife } from 'next/cache'
+
+async function getCurrentYear() {
+    'use cache'
+    cacheLife('max')
+    return new Date().getFullYear()
+}
 
 const Footer = () => {
     return (
@@ -11,7 +18,7 @@ const Footer = () => {
                     EventBook
                 </span>
             </span>
-            <p className="m-0 text-sm text-muted">&copy; {new Date().getFullYear()} EventBook. All rights reserved.</p>
+            <p className="m-0 text-sm text-muted">&copy; {getCurrentYear()} EventBook. All rights reserved.</p>
             <Link
                 className="text-xs font-semibold text-foreground no-underline hover:text-accent-dark"
                 href="#top"
