@@ -1,19 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose";
 
 const refreshTokenCookie = "eventbook_refresh_token";
 
-export function proxy(request: NextRequest) {
-    const hasRefreshSession = request.cookies.has(refreshTokenCookie);
+interface CustomJWTPayload {
+    role?: string;
+}
 
-    if (!hasRefreshSession) {
+export async function proxy(request: NextRequest) {
+    const { pathname } = request.nextUrl;
+    const hasRefreshSession = request.cookies.has(refreshTokenCookie);
+    const refreshToken = request.cookies.get(refreshTokenCookie)?.value;
+
+    const redirectToLogin = () => {
         const loginUrl = new URL("/login", request.url);
-        loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
+        loginUrl.searchParams.set("redirect", pathname);
         return NextResponse.redirect(loginUrl);
+    };
+
+    const isBookingRoute = pathname.startsWith("/events/") && pathname.endsWith("/book");
+    const isAdminRoute = pathname.startsWith("/admin");
+
+    if (!isBookingRoute && !isAdminRoute) {
+        return NextResponse.next();
     }
 
-    return NextResponse.next();
+    if (!hasRefreshSession || !refreshToken) {
+        return redirectToLogin();
+    }
+
+    try {
+        const { payload } = await jwtVerify<CustomJWTPayload>(
+            refreshToken,
+            new TextEncoder().encode(process.env.JWT_SECRET)
+        );
+
+        if (isAdminRoute) {
+            if (!payload.role || payload.role !== "ADMIN") {
+                return redirectToLogin();
+            }
+        }
+
+        return NextResponse.next();
+
+    } catch (error) {
+        return redirectToLogin();
+    }
 }
 
 export const config = {
-    matcher: "/events/:id/book",
+    matcher: [
+        '/events/:path*',
+        '/admin/:path*',
+    ],
 };
