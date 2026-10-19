@@ -214,7 +214,7 @@ The seed command creates these verified accounts, all using the password `EventB
 | Role | Email |
 | --- | --- |
 | Admin | `admin@eventbook.test` |
-| User | `aarav@eventbook.test` |
+| User | `suresh@eventbook.test` |
 | User | `maya@eventbook.test` |
 
 It also creates twelve future events for pagination, one past event, one nearly-full event, one full event, and six confirmed bookings. There is no deployment URL or automated backend test suite in this repository yet.
