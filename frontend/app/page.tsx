@@ -75,13 +75,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
               <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-accent-dark">Mark your calendar</p>
               <h2 className="m-0 text-3xl leading-none tracking-[-0.06em] sm:text-[2.6rem]">Latest upcoming events</h2>
             </div>
-
-            <Link
-              className="hidden text-xs font-semibold text-foreground no-underline hover:text-accent-dark sm:inline"
-              href="#events"
-            >
-              View all
-            </Link>
           </div>
 
           <UpcomingEvents events={events} />
