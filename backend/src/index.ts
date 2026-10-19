@@ -27,6 +27,10 @@ app.get('/protected', authenticateJwt, authorizeRoles("USER"), (_, res) => {
     res.json({ message: "This is a protected route" });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+const startServer = () => {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+};
+
+export { app, startServer };

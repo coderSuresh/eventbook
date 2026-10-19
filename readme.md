@@ -218,7 +218,14 @@ The seed command creates these verified accounts, all using the password `EventB
 | User | `suresh@eventbook.test` |
 | User | `maya@eventbook.test` |
 
-It also creates twelve future events for pagination, one past event, one nearly-full event, one full event, and six confirmed bookings. There is no deployment URL or automated backend test suite in this repository yet.
+It also creates twelve future events for pagination, one past event, one nearly-full event, one full event, and six confirmed bookings. There is no deployment URL yet.
+
+Backend integration tests use Node's built-in test runner and a separate PostgreSQL database configured through `TEST_DATABASE_URL`. Copy `backend/.env.test.example`, set the test database URL, apply the contract, and run:
+
+```bash
+cd backend
+npm test
+```
 
 ## AI Usage
 
