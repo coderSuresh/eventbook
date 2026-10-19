@@ -17,12 +17,9 @@ Implemented in the repository:
 Not currently included:
 
 - Live deployment URLs.
-- A seed script and committed test accounts.
 - Automated backend tests.
-- Admin frontend screens.
-- Frontend search, pagination controls, booking history, and cancellation screens.
 
-These are listed as gaps rather than represented as completed features.
+The repository includes a repeatable seed script with test accounts and sample data. Frontend search, pagination controls, booking history, and cancellation screens remain future work.
 
 ## Repository Layout
 
@@ -82,6 +79,7 @@ Apply the Prisma 8 contract to the database, then start the API:
 ```bash
 npm run contract:emit
 npx prisma db update
+npm run seed
 npm run dev
 ```
 
@@ -122,7 +120,12 @@ npm run lint
 npm run build
 ```
 
-There is currently no seed command or automated test command in either package.
+The backend seed command is idempotent for its deterministic fixture rows:
+
+```bash
+cd backend
+npm run seed
+```
 
 ## Frontend Routes
 
@@ -206,7 +209,15 @@ Seats are calculated from confirmed bookings compared with `Event.totalSeats`. B
 
 ## Test Accounts, Deployment, and Tests
 
-No deployment URL or test account is currently committed. There is also no seed script or automated test suite in this repository yet. They will soon be added.
+The seed command creates these verified accounts, all using the password `EventBook@2026!`:
+
+| Role | Email |
+| --- | --- |
+| Admin | `admin@eventbook.test` |
+| User | `aarav@eventbook.test` |
+| User | `maya@eventbook.test` |
+
+It also creates twelve future events for pagination, one past event, one nearly-full event, one full event, and six confirmed bookings. There is no deployment URL or automated backend test suite in this repository yet.
 
 ## AI Usage
 

@@ -7,7 +7,8 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/src/index.js",
-    "contract:emit": "prisma contract emit"
+    "contract:emit": "prisma contract emit",
+    "seed": "tsx src/scripts/seed.ts"
   },
   "keywords": [],
   "author": "",
