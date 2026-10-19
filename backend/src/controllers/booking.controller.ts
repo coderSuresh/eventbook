@@ -15,7 +15,25 @@ export class BookingController {
                 eventId
             }).all();
 
-            return res.status(200).json({ bookings });
+            const bookingsWithUsers = await Promise.all(bookings.map(async (booking) => {
+                const user = await db.orm.public.User.where({ id: booking.userId }).first();
+
+                return {
+                    id: booking.id,
+                    eventId: booking.eventId,
+                    userId: booking.userId,
+                    status: booking.status,
+                    createdAt: booking.createdAt,
+                    user: {
+                        name: user?.name ?? "Unknown user",
+                        email: user?.email ?? "Unavailable",
+                    },
+                };
+            }));
+
+            return res.status(200).json({
+                bookings: bookingsWithUsers,
+            });
         } catch (error) {
             console.error("Error fetching bookings:", error);
             return res.status(500).json({ message: "Internal server error" });
