@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getAdminEvents, getEventBookings, type AdminEvent, type AttendeeBooking } from "@/services/admin.service"
+import { getAllAdminEvents, getEventBookings, type AdminEvent, type AttendeeBooking } from "@/services/admin.service"
 
 function formatDate(date: string) {
     return new Date(date).toLocaleDateString("en-US", {
@@ -30,7 +30,7 @@ const AdminBookingPage = () => {
     const [error, setError] = useState("")
 
     useEffect(() => {
-        getAdminEvents()
+        getAllAdminEvents()
             .then((loadedEvents) => {
                 setEvents(loadedEvents)
                 setSelectedEventId(loadedEvents[0]?.id ?? "")

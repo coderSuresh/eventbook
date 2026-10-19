@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import AdminEventForm from "@/components/events/admin-event-form"
 import AdminEventList from "@/components/events/admin-event-list"
 import { createAdminEvent, deleteAdminEvent, getAdminEvents, type AdminEvent, type EventInput, updateAdminEvent } from "@/services/admin.service"
+import type { Pagination } from "@/services/events.service"
 
 const AdminEventPage = () => {
     const [events, setEvents] = useState<AdminEvent[]>([])
@@ -11,15 +12,23 @@ const AdminEventPage = () => {
     const [isLoading, setIsLoading] = useState(true)
     const [selectedEvent, setSelectedEvent] = useState<AdminEvent | undefined>()
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [page, setPage] = useState(1)
+    const [pagination, setPagination] = useState<Pagination>({ page: 1, pageSize: 10, total: 0, totalPages: 0, hasNextPage: false, hasPreviousPage: false })
 
     useEffect(() => {
-        getAdminEvents()
-            .then(setEvents)
+        setIsLoading(true)
+        getAdminEvents(page)
+            .then((result) => {
+                setEvents(result.data)
+                setPagination(result.pagination)
+            })
             .finally(() => setIsLoading(false))
-    }, [])
+    }, [page])
 
     async function refreshEvents() {
-        setEvents(await getAdminEvents())
+        const result = await getAdminEvents(page)
+        setEvents(result.data)
+        setPagination(result.pagination)
     }
 
     async function handleSave(input: EventInput) {
@@ -96,8 +105,10 @@ const AdminEventPage = () => {
                         </p>
                         : <AdminEventList
                             events={events}
+                            pagination={pagination}
                             onEdit={showEditForm}
                             onCancel={handleCancel}
+                            onPageChange={setPage}
                         />
             }
         </main>

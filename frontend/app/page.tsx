@@ -6,17 +6,29 @@ import { getUpcomingEvents } from "@/services/events.service";
 
 export const instant = false;
 
-async function loadUpcomingEvents() {
+async function loadUpcomingEvents(page: number) {
   try {
-    const result = await getUpcomingEvents(1, 10);
-    return result.data;
+    return await getUpcomingEvents(page, 10);
   } catch {
-    return [];
+    return {
+      data: [],
+      pagination: {
+        page,
+        pageSize: 10,
+        total: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    };
   }
 }
 
-export default async function Home() {
-  const events = await loadUpcomingEvents();
+export default async function Home({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const params = await searchParams;
+  const requestedPage = Number(params.page);
+  const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const { data: events, pagination } = await loadUpcomingEvents(page);
 
   return (
     <div className="flex min-h-full flex-col">
@@ -73,6 +85,11 @@ export default async function Home() {
           </div>
 
           <UpcomingEvents events={events} />
+          {pagination.totalPages > 1 && <nav className="mt-8 flex items-center justify-between gap-4" aria-label="Event pages">
+            {pagination.hasPreviousPage ? <Link className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-foreground no-underline transition hover:border-accent hover:text-accent-dark" href={`/?page=${pagination.page - 1}#events`}>Previous</Link> : <span />}
+            <p className="text-xs text-muted">Page {pagination.page} of {pagination.totalPages}</p>
+            {pagination.hasNextPage ? <Link className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-foreground no-underline transition hover:border-accent hover:text-accent-dark" href={`/?page=${pagination.page + 1}#events`}>Next</Link> : <span />}
+          </nav>}
         </section>
       </main>
 

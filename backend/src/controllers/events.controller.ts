@@ -2,10 +2,37 @@ import type { Request, Response } from "express";
 import { db } from "../prisma/db.js";
 
 export class EventsController {
-    static async getAllEvents(_: Request, res: Response) {
+    static async getAllEvents(req: Request, res: Response) {
         try {
-            const events = await db.orm.public.Event.all();
-            return res.status(200).json(events);
+            const requestedPage = Number(req.query["page"] ?? 1);
+            const requestedPageSize = Number(req.query["pageSize"] ?? 10);
+            const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+            const pageSize = Number.isInteger(requestedPageSize) && requestedPageSize > 0
+                ? Math.min(requestedPageSize, 50)
+                : 10;
+            const offset = (page - 1) * pageSize;
+            const eventsQuery = db.orm.public.Event;
+            const { count: total } = await eventsQuery.aggregate((aggregate) => ({
+                count: aggregate.count(),
+            }));
+            const events = await eventsQuery
+                .orderBy((event) => event.date.asc())
+                .limit(pageSize)
+                .offset(offset)
+                .all();
+            const totalPages = Math.ceil(total / pageSize);
+
+            return res.status(200).json({
+                data: events,
+                pagination: {
+                    page,
+                    pageSize,
+                    total,
+                    totalPages,
+                    hasNextPage: page < totalPages,
+                    hasPreviousPage: page > 1,
+                },
+            });
         } catch (error) {
             console.error("Error fetching events:", error);
             return res.status(500).json({ message: "Internal server error" });

@@ -162,12 +162,13 @@ Access tokens are sent in the `Authorization: Bearer <token>` header. The refres
 | `GET` | `/events/upcoming?page=1&pageSize=10` | Public | Return active future events and pagination metadata |
 | `GET` | `/events/search?query=...` | Public | Search active events by title |
 | `GET` | `/events/:id` | Public | Return one event |
-| `GET` | `/events` | Public | Return all events |
+| `GET` | `/events?page=1&pageSize=10` | Public | Return paginated events for admin views |
 | `POST` | `/events` | Admin | Create an event |
 | `PUT` | `/events/:id` | Admin | Update an event |
 | `DELETE` | `/events/:id` | Admin | Delete or cancel an event |
 
 `/events/upcoming` returns an object with `data` and `pagination`. `pageSize` is capped at 50 by the backend.
+`/events` uses the same `data` and `pagination` response shape and is used by the admin event dashboard. The admin bookings dashboard loads all event pages when it needs a complete event selector.
 
 ### Bookings
 

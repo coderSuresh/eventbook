@@ -1,11 +1,14 @@
 "use client"
 
 import type { AdminEvent } from "@/services/admin.service"
+import type { Pagination } from "@/services/events.service"
 
 type AdminEventListProps = {
     events: AdminEvent[]
+    pagination: Pagination
     onEdit: (event: AdminEvent) => void
     onCancel: (event: AdminEvent) => void
+    onPageChange: (page: number) => void
 }
 
 function formatEventDate(date: string) {
@@ -18,7 +21,7 @@ function formatEventDate(date: string) {
     }
 }
 
-export default function AdminEventList({ events, onEdit, onCancel }: AdminEventListProps) {
+export default function AdminEventList({ events, pagination, onEdit, onCancel, onPageChange }: AdminEventListProps) {
     return (
         <section className="overflow-hidden rounded-2xl border border-line bg-white/55">
             <div className="border-b border-line bg-panel/55 px-6 py-5 sm:px-8">
@@ -45,6 +48,11 @@ export default function AdminEventList({ events, onEdit, onCancel }: AdminEventL
                     )
                 })}
             </div>
+            {pagination.totalPages > 1 && <div className="flex items-center justify-between gap-4 px-6 py-5 sm:px-8">
+                <button type="button" onClick={() => onPageChange(pagination.page - 1)} disabled={!pagination.hasPreviousPage} className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-foreground transition hover:border-accent hover:text-accent-dark disabled:cursor-not-allowed disabled:opacity-40">Previous</button>
+                <p className="text-xs text-muted">Page {pagination.page} of {pagination.totalPages}</p>
+                <button type="button" onClick={() => onPageChange(pagination.page + 1)} disabled={!pagination.hasNextPage} className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-foreground transition hover:border-accent hover:text-accent-dark disabled:cursor-not-allowed disabled:opacity-40">Next</button>
+            </div>}
         </section>
     )
 }
