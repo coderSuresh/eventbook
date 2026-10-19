@@ -38,10 +38,22 @@ export class EventsController {
                 .offset(offset)
                 .all();
 
+            const eventsWithAvailability = await Promise.all(upcomingEvents.map(async (event) => {
+                const confirmedBookings = await db.orm.public.Booking.where({
+                    eventId: event.id,
+                    status: "CONFIRMED",
+                }).all();
+
+                return {
+                    ...event,
+                    remainingSeats: Math.max(event.totalSeats - confirmedBookings.length, 0),
+                };
+            }));
+
             const totalPages = Math.ceil(total / pageSize);
 
             return res.status(200).json({
-                data: upcomingEvents,
+                data: eventsWithAvailability,
                 pagination: {
                     page,
                     pageSize,

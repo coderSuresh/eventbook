@@ -6,6 +6,8 @@ export type Event = {
     description: string;
     date: string;
     venue: string;
+    totalSeats: number;
+    remainingSeats?: number;
 };
 
 export type Pagination = {
