@@ -21,7 +21,17 @@ export default function EventDetails({ event }: EventDetailsProps) {
                 <h2 className="mb-4 text-2xl font-semibold tracking-[-0.04em] text-foreground">About this event</h2>
                 <p className="m-0 text-base leading-8 text-muted">{event.description}</p>
             </div>
-            <Link className="mt-12 inline-flex rounded-full bg-accent px-6 py-4 text-sm font-semibold text-white no-underline transition hover:bg-accent-dark" href={`/events/${event.id}/book`}>Book this event</Link>
+            {
+                event.isUpcoming && event.remainingSeats !== 0 ?
+                    <Link
+                        className="mt-12 inline-flex rounded-full bg-accent px-6 py-4 text-sm font-semibold text-white no-underline transition hover:bg-accent-dark"
+                        href={`/events/${event.id}/book`}
+                    >
+                        Book this event
+                    </Link>
+                    :
+                    <p className="mt-12 text-sm font-semibold text-muted">This event is no longer available for booking.</p>
+            }
         </div>
     );
 }

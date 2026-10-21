@@ -8,6 +8,8 @@ export type Event = {
     venue: string;
     totalSeats: number;
     remainingSeats?: number;
+    isActive?: boolean;
+    isUpcoming?: boolean;
 };
 
 export type Pagination = {

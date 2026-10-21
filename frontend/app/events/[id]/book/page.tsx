@@ -30,7 +30,13 @@ export default async function BookEventPage({ params }: { params: Promise<{ id: 
                         <p className="m-0 text-sm text-muted"><strong className="block text-xs uppercase tracking-[0.14em] text-foreground">Time</strong>{eventDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</p>
                         <p className="m-0 text-sm text-muted"><strong className="block text-xs uppercase tracking-[0.14em] text-foreground">Venue</strong>{event.venue}</p>
                     </div>
-                    <BookEventButton eventId={event.id} />
+                    {event.isUpcoming && event.remainingSeats !== 0 ? (
+                        <BookEventButton eventId={event.id} />
+                    ) : (
+                        <p className="mt-8 text-sm text-accent-dark">
+                            {event.isUpcoming === false ? "This event is no longer upcoming." : "This event is sold out."}
+                        </p>
+                    )}
                 </section>
             </main>
             <Footer />

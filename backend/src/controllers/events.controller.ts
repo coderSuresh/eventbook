@@ -134,7 +134,16 @@ export class EventsController {
                 return res.status(404).json({ message: "Event not found" });
             }
 
-            return res.status(200).json(event);
+            const confirmedBookings = await db.orm.public.Booking.where({
+                eventId: event.id,
+                status: "CONFIRMED",
+            }).all();
+
+            return res.status(200).json({
+                ...event,
+                remainingSeats: Math.max(event.totalSeats - confirmedBookings.length, 0),
+                isUpcoming: event.isActive && new Date(event.date).getTime() >= Date.now(),
+            });
         } catch (error) {
             console.error("Error fetching event:", error);
             return res.status(500).json({ message: "Internal server error" });
