@@ -48,11 +48,47 @@ export class BookingController {
                 return res.status(400).json({ message: "User not found" });
             }
 
-            const bookings = await db.orm.public.Booking.where({
-                userId
-            }).all();
+            const requestedPage = Number(req.query["page"] ?? 1);
+            const requestedPageSize = Number(req.query["pageSize"] ?? 10);
+            const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+            const pageSize = Number.isInteger(requestedPageSize) && requestedPageSize > 0
+                ? Math.min(requestedPageSize, 50)
+                : 10;
+            const bookingsQuery = db.orm.public.Booking.where({ userId });
+            const { count: total } = await bookingsQuery.aggregate((aggregate) => ({
+                count: aggregate.count(),
+            }));
+            const bookings = await bookingsQuery
+                .orderBy((booking) => booking.createdAt.desc())
+                .limit(pageSize)
+                .offset((page - 1) * pageSize)
+                .all();
+            const bookingsWithEvents = await Promise.all(bookings.map(async (booking) => {
+                const event = await db.orm.public.Event.where({ id: booking.eventId }).first();
 
-            return res.status(200).json({ bookings });
+                return {
+                    ...booking,
+                    event: event
+                        ? {
+                            ...event,
+                            isUpcoming: new Date(event.date).getTime() >= Date.now(),
+                        }
+                        : null,
+                };
+            }));
+            const totalPages = Math.ceil(total / pageSize);
+
+            return res.status(200).json({
+                data: bookingsWithEvents,
+                pagination: {
+                    page,
+                    pageSize,
+                    total,
+                    totalPages,
+                    hasNextPage: page < totalPages,
+                    hasPreviousPage: page > 1,
+                },
+            });
         } catch (error) {
             console.error("Error fetching bookings:", error);
             return res.status(500).json({ message: "Internal server error" });

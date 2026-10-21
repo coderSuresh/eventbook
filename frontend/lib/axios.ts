@@ -50,7 +50,7 @@ function isRefreshableRequest(error: AxiosError) {
         && typeof window !== "undefined";
 }
 
-function refreshAccessToken() {
+export function refreshAccessToken() {
     refreshPromise ??= refreshClient
         .post<AuthResponse>("/auth/refresh")
         .then(({ data }) => {

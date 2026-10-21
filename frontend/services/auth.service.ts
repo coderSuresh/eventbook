@@ -1,5 +1,5 @@
 import axios from "axios";
-import apiClient from "@/lib/axios";
+import apiClient, { refreshAccessToken } from "@/lib/axios";
 import { clearAuthToken, setAuthToken } from "@/lib/auth-token";
 
 export type LoginCredentials = {
@@ -39,6 +39,13 @@ export async function logout() {
     } finally {
         clearAuthToken();
     }
+}
+
+export async function restoreSession() {
+    const token = await refreshAccessToken();
+    setAuthToken(token);
+
+    return { token };
 }
 
 export async function register(credentials: RegisterCredentials) {

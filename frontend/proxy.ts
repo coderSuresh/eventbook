@@ -20,8 +20,9 @@ export async function proxy(request: NextRequest) {
 
     const isBookingRoute = pathname.startsWith("/events/") && pathname.endsWith("/book");
     const isAdminRoute = pathname.startsWith("/admin");
+    const isProfileRoute = pathname.startsWith("/profile");
 
-    if (!isBookingRoute && !isAdminRoute) {
+    if (!isBookingRoute && !isAdminRoute && !isProfileRoute) {
         return NextResponse.next();
     }
 
@@ -43,7 +44,7 @@ export async function proxy(request: NextRequest) {
 
         return NextResponse.next();
 
-    } catch (error) {
+    } catch {
         return redirectToLogin();
     }
 }
@@ -52,5 +53,6 @@ export const config = {
     matcher: [
         '/events/:path*',
         '/admin/:path*',
+        '/profile/:path*',
     ],
 };
