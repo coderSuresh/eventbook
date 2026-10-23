@@ -35,7 +35,7 @@ apiClient.interceptors.request.use((config) => {
 });
 
 function isPublicAuthRequest(url = "") {
-    return ["/auth/login", "/auth/register", "/auth/refresh", "/auth/logout"]
+    return ["/auth/login", "/auth/register", "/auth/refresh", "/auth/logout", "/auth/verify"]
         .some((path) => url.includes(path));
 }
 

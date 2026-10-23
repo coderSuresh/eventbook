@@ -54,6 +54,14 @@ export async function register(credentials: RegisterCredentials) {
     return response.data;
 }
 
+export async function verifyEmail(token: string) {
+    const response = await apiClient.get<MessageResponse>("/auth/verify", {
+        params: { token },
+    });
+
+    return response.data;
+}
+
 export function getAuthErrorMessage(error: unknown) {
     if (axios.isAxiosError<BackendError>(error)) {
         const responseData = error.response?.data;
