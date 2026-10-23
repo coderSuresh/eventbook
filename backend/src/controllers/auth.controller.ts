@@ -35,8 +35,10 @@ export class AuthController {
         return crypto.createHash("sha256").update(token).digest("hex");
     }
 
-    private static generateRandomToken(email: string): string {
-        return crypto.createHash("sha256").update(email + Date.now().toString()).digest("hex")
+    private static generateRandomToken(): { token: string; hash: string } {
+        const token = crypto.randomBytes(32).toString("hex");
+        const hash = crypto.createHash("sha256").update(token).digest("hex");
+        return { token, hash };
     }
 
     private static async sendVerificationEmail(email: string, token: string) {
@@ -82,10 +84,10 @@ export class AuthController {
                     return res.status(401).json({ message: "Email not verified. Check your email for a verification link." });
                 }
 
-                const token = AuthController.generateRandomToken(email);
+                const { token, hash } = AuthController.generateRandomToken();
 
                 await db.orm.public.User.where({ id: user.id }).update({
-                    token,
+                    token: hash,
                 });
 
                 await AuthController.sendVerificationEmail(email, token);
@@ -170,10 +172,10 @@ export class AuthController {
                     return res.status(400).json({ message: "Email already exists. Check your email for a verification link." });
                 }
 
-                const token = AuthController.generateRandomToken(email);
+                const { token, hash } = AuthController.generateRandomToken();
 
                 await db.orm.public.User.where({ id: existingUser.id }).update({
-                    token,
+                    token: hash,
                 });
 
                 await AuthController.sendVerificationEmail(email, token);
@@ -182,18 +184,18 @@ export class AuthController {
             }
 
             const hashedPassword = await bcrypt.hash(password, 10);
-            const token = AuthController.generateRandomToken(email);
+            const { token, hash } = AuthController.generateRandomToken();
 
-            const newUser = await db.orm.public.User.create({
+            await db.orm.public.User.create({
                 name,
                 email,
                 password: hashedPassword,
-                token,
+                token: hash,
             });
 
             await AuthController.sendVerificationEmail(email, token);
 
-            return res.status(201).json({ message: "User registered successfully", newUser });
+            return res.status(201).json({ message: "User registered successfully. Check your email to verify it." });
         } catch (error) {
             console.error("Error during registration:", error);
             return res.status(500).json({ message: "Internal server error" });
@@ -208,8 +210,10 @@ export class AuthController {
                 return res.status(400).json({ message: "Invalid token" });
             }
 
+            const hash = crypto.createHash("sha256").update(token).digest("hex");
+
             const user = await db.orm.public.User.where({
-                token,
+                token: hash,
             }).first();
 
             if (!user) {
