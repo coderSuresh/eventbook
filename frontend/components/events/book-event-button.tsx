@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createBooking } from "@/services/booking.service";
 import { getAuthErrorMessage } from "@/services/auth.service";
+import { useAuth } from "@/contexts/auth.context";
+import Link from "next/link";
 
 type BookEventButtonProps = {
     eventId: string;
@@ -15,6 +17,7 @@ export default function BookEventButton({ eventId }: BookEventButtonProps) {
     const [error, setError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isBooked, setIsBooked] = useState(false);
+    const { status } = useAuth();
 
     async function handleBooking() {
         setError("");
@@ -33,6 +36,26 @@ export default function BookEventButton({ eventId }: BookEventButtonProps) {
         } finally {
             setIsSubmitting(false);
         }
+    }
+
+    if (status === "loading") {
+        return (
+            <div className="mt-8">
+                <button className="inline-flex rounded-full bg-accent px-6 py-4 text-sm font-semibold text-white transition hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-60" type="button" disabled>
+                    Loading...
+                </button>
+            </div>
+        );
+    }
+
+    if(status === "unauthenticated") {
+        return (
+            <div className="mt-8">
+                <Link className="inline-flex rounded-full bg-accent px-6 py-4 text-sm font-semibold text-white transition hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-60" href={`/login?redirect=/events/${eventId}/book`}>
+                    Log in to book
+                </Link>
+            </div>
+        );
     }
 
     return (

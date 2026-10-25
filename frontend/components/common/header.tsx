@@ -1,26 +1,15 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
-import { AUTH_CHANGE_EVENT, getAuthToken } from "@/lib/auth-token"
-import { logout, restoreSession } from "@/services/auth.service"
+import { useState } from "react"
+import { logout } from "@/services/auth.service"
+import { useAuth } from "@/contexts/auth.context"
 
 const Header = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const { status } = useAuth()
     const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-    useEffect(() => {
-        const syncAuthState = () => setIsAuthenticated(Boolean(getAuthToken()))
-        const handleAuthChange = () => syncAuthState()
-
-        syncAuthState()
-        window.addEventListener(AUTH_CHANGE_EVENT, handleAuthChange)
-        restoreSession().catch(() => {
-            syncAuthState()
-        })
-
-        return () => window.removeEventListener(AUTH_CHANGE_EVENT, handleAuthChange)
-    }, [])
+    const isAuthenticated = status === "authenticated"
 
     async function handleLogout() {
         setIsLoggingOut(true)

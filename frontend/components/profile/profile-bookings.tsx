@@ -3,7 +3,9 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { cancelBooking, getUserBookings, type Booking, type BookingPagination } from "@/services/booking.service"
-import { getAuthErrorMessage, restoreSession } from "@/services/auth.service"
+import { getAuthErrorMessage } from "@/services/auth.service"
+import { useRouter, usePathname } from "next/navigation"
+import { useAuth } from "@/contexts/auth.context"
 
 function formatDate(date: string) {
     return new Date(date).toLocaleDateString("en-US", {
@@ -53,11 +55,28 @@ export default function ProfileBookings() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState("")
 
-    useEffect(() => {
-        let isCurrentRequest = true
+    const { status } = useAuth()
+    const router = useRouter()
+    const pathname = usePathname()
 
-        restoreSession()
-            .then(() => getUserBookings(page))
+    useEffect(() => {
+        if (status === "loading") {
+            setIsLoading(true)
+            return
+        }
+
+        if (status === "unauthenticated") {
+            router.replace(
+                `/login?redirect=${encodeURIComponent(pathname)}`
+            )
+            return
+        }
+
+        let isCurrentRequest = true
+        setIsLoading(true)
+        setError("")
+
+        getUserBookings(page)
             .then((result) => {
                 if (isCurrentRequest) {
                     setBookings(result.data)
@@ -65,7 +84,9 @@ export default function ProfileBookings() {
                 }
             })
             .catch((requestError) => {
-                if (isCurrentRequest) setError(getAuthErrorMessage(requestError))
+                if (isCurrentRequest) {
+                    setError(getAuthErrorMessage(requestError))
+                }
             })
             .finally(() => {
                 if (isCurrentRequest) setIsLoading(false)
@@ -74,7 +95,7 @@ export default function ProfileBookings() {
         return () => {
             isCurrentRequest = false
         }
-    }, [page])
+    }, [page, status, router, pathname])
 
     const currentBookings = useMemo(() => bookings.filter((booking) => booking.status === "CONFIRMED" && booking.event?.isUpcoming), [bookings])
     const historicalBookings = useMemo(() => bookings.filter((booking) => !currentBookings.includes(booking)), [bookings, currentBookings])
