@@ -20,6 +20,11 @@ function BookingCard({ booking, onCancel }: { booking: Booking; onCancel: (booki
     const event = booking.event
 
     async function handleCancel() {
+
+        if (!confirm("Are you sure you want to cancel this booking? This action cannot be undone.")) {
+            return
+        }
+
         setIsCancelling(true)
         try {
             await onCancel(booking)
