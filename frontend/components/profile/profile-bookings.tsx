@@ -61,7 +61,6 @@ export default function ProfileBookings() {
 
     useEffect(() => {
         if (status === "loading") {
-            setIsLoading(true)
             return
         }
 
@@ -72,30 +71,33 @@ export default function ProfileBookings() {
             return
         }
 
-        let isCurrentRequest = true
-        setIsLoading(true)
-        setError("")
-
+        const request = { current: true }
         getUserBookings(page)
             .then((result) => {
-                if (isCurrentRequest) {
+                if (request.current) {
                     setBookings(result.data)
                     setPagination(result.pagination)
                 }
             })
             .catch((requestError) => {
-                if (isCurrentRequest) {
+                if (request.current) {
                     setError(getAuthErrorMessage(requestError))
                 }
             })
             .finally(() => {
-                if (isCurrentRequest) setIsLoading(false)
+                if (request.current) setIsLoading(false)
             })
 
         return () => {
-            isCurrentRequest = false
+            request.current = false
         }
     }, [page, status, router, pathname])
+
+    function handlePageChange(nextPage: number) {
+        setIsLoading(true)
+        setError("")
+        setPage(nextPage)
+    }
 
     const currentBookings = useMemo(() => bookings.filter((booking) => booking.status === "CONFIRMED" && booking.event?.isUpcoming), [bookings])
     const historicalBookings = useMemo(() => bookings.filter((booking) => !currentBookings.includes(booking)), [bookings, currentBookings])
@@ -130,9 +132,9 @@ export default function ProfileBookings() {
                 {renderSection("Current bookings", currentBookings, "You do not have any upcoming bookings.")}
                 {renderSection("Booking history", historicalBookings, "Your cancelled and past bookings will appear here.")}
                 {pagination && pagination.totalPages > 1 && <nav className="mt-10 flex items-center justify-between gap-4" aria-label="Booking pages">
-                    {pagination.hasPreviousPage ? <button className="rounded-full border border-line px-4 py-2 text-xs font-semibold transition hover:border-accent hover:text-accent-dark" type="button" onClick={() => setPage((current) => current - 1)}>Previous</button> : <span />}
+                    {pagination.hasPreviousPage ? <button className="rounded-full border border-line px-4 py-2 text-xs font-semibold transition hover:border-accent hover:text-accent-dark" type="button" onClick={() => handlePageChange(page - 1)}>Previous</button> : <span />}
                     <p className="text-xs text-muted">Page {pagination.page} of {pagination.totalPages}</p>
-                    {pagination.hasNextPage ? <button className="rounded-full border border-line px-4 py-2 text-xs font-semibold transition hover:border-accent hover:text-accent-dark" type="button" onClick={() => setPage((current) => current + 1)}>Next</button> : <span />}
+                    {pagination.hasNextPage ? <button className="rounded-full border border-line px-4 py-2 text-xs font-semibold transition hover:border-accent hover:text-accent-dark" type="button" onClick={() => handlePageChange(page + 1)}>Next</button> : <span />}
                 </nav>}
             </>}
             <Link className="mt-10 inline-flex text-sm font-semibold text-foreground hover:text-accent-dark" href="/#events">Browse upcoming events</Link>

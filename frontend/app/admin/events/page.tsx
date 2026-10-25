@@ -15,15 +15,24 @@ const AdminEventPage = () => {
     const [page, setPage] = useState(1)
     const [pagination, setPagination] = useState<Pagination>({ page: 1, pageSize: 10, total: 0, totalPages: 0, hasNextPage: false, hasPreviousPage: false })
 
+    async function loadEvents(currentPage: number) {
+        try {
+            const result = await getAdminEvents(currentPage)
+            setEvents(result.data)
+            setPagination(result.pagination)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     useEffect(() => {
-        setIsLoading(true)
-        getAdminEvents(page)
-            .then((result) => {
-                setEvents(result.data)
-                setPagination(result.pagination)
-            })
-            .finally(() => setIsLoading(false))
+        void loadEvents(page)
     }, [page])
+
+    function handlePageChange(nextPage: number) {
+        setIsLoading(true)
+        setPage(nextPage)
+    }
 
     async function refreshEvents() {
         const result = await getAdminEvents(page)
@@ -108,7 +117,7 @@ const AdminEventPage = () => {
                             pagination={pagination}
                             onEdit={showEditForm}
                             onCancel={handleCancel}
-                            onPageChange={setPage}
+                            onPageChange={handlePageChange}
                         />
             }
         </main>

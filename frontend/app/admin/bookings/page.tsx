@@ -33,7 +33,9 @@ const AdminBookingPage = () => {
         getAllAdminEvents()
             .then((loadedEvents) => {
                 setEvents(loadedEvents)
-                setSelectedEventId(loadedEvents[0]?.id ?? "")
+                const firstEventId = loadedEvents[0]?.id ?? ""
+                setSelectedEventId(firstEventId)
+                setIsLoadingBookings(Boolean(firstEventId))
             })
             .catch(() => setError("Unable to load events right now."))
             .finally(() => setIsLoadingEvents(false))
@@ -41,13 +43,10 @@ const AdminBookingPage = () => {
 
     useEffect(() => {
         if (!selectedEventId) {
-            setBookings([])
             return
         }
 
         let isCurrentRequest = true
-        setIsLoadingBookings(true)
-        setError("")
 
         getEventBookings(selectedEventId)
             .then((loadedBookings) => {
@@ -72,6 +71,13 @@ const AdminBookingPage = () => {
         }
     }, [selectedEventId])
 
+    function handleEventChange(eventId: string) {
+        setSelectedEventId(eventId)
+        setBookings([])
+        setIsLoadingBookings(Boolean(eventId))
+        setError("")
+    }
+
     const selectedEvent = events.find((event) => event.id === selectedEventId)
     const confirmedBookings = bookings.filter((booking) => booking.status === "CONFIRMED")
     const cancelledBookings = bookings.filter((booking) => booking.status === "CANCELLED")
@@ -87,8 +93,24 @@ const AdminBookingPage = () => {
             <section className="mb-6 rounded-2xl border border-line bg-white/55 p-6 sm:p-8">
                 <label className="flex max-w-xl flex-col gap-2 text-sm font-semibold" htmlFor="event-select">
                     Select an event
-                    <select id="event-select" value={selectedEventId} onChange={(event) => setSelectedEventId(event.target.value)} disabled={isLoadingEvents || events.length === 0} className="rounded-lg border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-60">
-                        {isLoadingEvents ? <option>Loading events...</option> : events.length === 0 ? <option>No events available</option> : events.map((event) => <option key={event.id} value={event.id}>{event.title}{event.isActive ? "" : " (Cancelled)"}</option>)}
+                    <select
+                        id="event-select"
+                        value={selectedEventId}
+                        onChange={(e) => handleEventChange(e.target.value)}
+                        disabled={isLoadingEvents || events.length === 0}
+                        className="rounded-lg border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                        {isLoadingEvents
+                            ? <option>Loading events...</option>
+                            : events.length === 0
+                                ? <option>No events available</option>
+                                : events.map((event) => <option
+                                    key={event.id}
+                                    value={event.id}
+                                >
+                                    {event.title}{event.isActive ? "" : " (Cancelled)"}
+                                </option>
+                                )}
                     </select>
                 </label>
                 {selectedEvent && <p className="mt-4 text-sm text-muted">{formatDate(selectedEvent.date)} <span className="px-1.5 text-accent">/</span> {selectedEvent.venue}</p>}
