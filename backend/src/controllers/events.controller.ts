@@ -104,14 +104,40 @@ export class EventsController {
                 return res.status(400).json({ message: "Invalid search query" });
             }
 
-            console.log(`%${query}%`);
-
-            const events = await db.orm.public.Event
+            const requestedPage = Number(req.query["page"] ?? 1);
+            const requestedPageSize = Number(req.query["pageSize"] ?? 10);
+            const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+            const pageSize = Number.isInteger(requestedPageSize) && requestedPageSize > 0
+                ? Math.min(requestedPageSize, 50)
+                : 10;
+            const offset = (page - 1) * pageSize;
+            const searchTerm = query.trim();
+            const searchQuery = db.orm.public.Event
+                .where(q => q.date.gte(new Date().toISOString()))
                 .where({ isActive: true })
-                .where(q => q.title.ilike(`%${query}%`))
-                .all();
+                .where(q => q.title.ilike(`%${searchTerm}%`));
 
-            return res.status(200).json(events);
+            const { count: total } = await searchQuery.aggregate((aggregate) => ({
+                count: aggregate.count(),
+            }));
+            const events = await searchQuery
+                .orderBy((event) => event.date.asc())
+                .limit(pageSize)
+                .offset(offset)
+                .all();
+            const totalPages = Math.ceil(total / pageSize);
+
+            return res.status(200).json({
+                data: events,
+                pagination: {
+                    page,
+                    pageSize,
+                    total,
+                    totalPages,
+                    hasNextPage: page < totalPages,
+                    hasPreviousPage: page > 1,
+                },
+            });
         } catch (error) {
             console.error("Error searching events:", error);
             return res.status(500).json({ message: "Internal server error" });

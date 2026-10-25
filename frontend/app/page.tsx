@@ -2,13 +2,13 @@ import Header from "@/components/common/header"
 import Footer from "@/components/common/footer"
 import UpcomingEvents from "@/components/events/upcoming-events"
 import Link from "next/link"
-import { getUpcomingEvents } from "@/services/events.service"
+import { getUpcomingEvents, searchEvents, type PaginatedEvents } from "@/services/events.service"
 
 export const instant = false
 
-async function loadUpcomingEvents(page: number) {
+async function loadUpcomingEvents(page: number, query: string) {
   try {
-    return await getUpcomingEvents(page, 10)
+    return query ? await searchEvents(query, page, 10) : await getUpcomingEvents(page, 10)
   } catch {
     return {
       data: [],
@@ -24,11 +24,12 @@ async function loadUpcomingEvents(page: number) {
   }
 }
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+export default async function Home({ searchParams }: { searchParams: Promise<{ page?: string; query?: string }> }) {
   const params = await searchParams
   const requestedPage = Number(params.page)
   const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
-  const { data: events, pagination } = await loadUpcomingEvents(page)
+  const query = params.query?.trim() ?? ""
+  const { data: events, pagination }: PaginatedEvents = await loadUpcomingEvents(page, query)
 
   return (
     <div className="flex min-h-full flex-col">
@@ -69,19 +70,48 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
         </section>
 
         <section id="events" className="mx-auto w-full max-w-6xl px-6 pb-24 lg:px-8 lg:pb-32">
-          <div className="flex items-end justify-between gap-6 border-t border-line pt-6">
+          <div className="flex flex-col gap-5 border-t border-line pt-6 sm:flex-row sm:items-end sm:justify-between">
 
             <div>
               <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-accent-dark">Mark your calendar</p>
               <h2 className="m-0 text-3xl leading-none tracking-[-0.06em] sm:text-[2.6rem]">Latest upcoming events</h2>
+              {query && (
+                <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted" role="status" aria-live="polite">
+                  <span>Showing results for</span>
+                  <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-accent/25 bg-accent-soft/45 px-3 py-1 font-semibold text-accent-dark">
+                    <span className="truncate">&quot;{query}&quot;</span>
+                  </span>
+                  <Link
+                    href="/#events"
+                    className="rounded-full px-2 py-1 font-semibold text-accent-dark underline decoration-accent/40 underline-offset-4 transition hover:bg-accent-soft hover:decoration-accent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+                  >
+                    Clear search
+                  </Link>
+                </div>
+              )}
+            </div>
+            <div className="flex w-full max-w-sm items-center gap-2">
+              <form action="#events" method="get" className="flex min-w-0 flex-1 items-center gap-2">
+                <label htmlFor="event-search" className="sr-only">Search events by title</label>
+                <input
+                  id="event-search"
+                  name="query"
+                  type="search"
+                  defaultValue={query}
+                  required
+                  placeholder="Search by title"
+                  className="min-w-0 flex-1 rounded-full border border-line bg-white/60 px-4 py-2.5 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-accent focus:ring-2 focus:ring-accent/20"
+                />
+                <button type="submit" className="rounded-full bg-accent px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-accent-dark focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2">Search</button>
+              </form>
             </div>
           </div>
 
           <UpcomingEvents events={events} />
           {pagination.totalPages > 1 && <nav className="mt-8 flex items-center justify-between gap-4" aria-label="Event pages">
-            {pagination.hasPreviousPage ? <Link className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-foreground no-underline transition hover:border-accent hover:text-accent-dark" href={`/?page=${pagination.page - 1}#events`}>Previous</Link> : <span />}
+            {pagination.hasPreviousPage ? <Link className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-foreground no-underline transition hover:border-accent hover:text-accent-dark" href={`/?${query ? `query=${encodeURIComponent(query)}&` : ""}page=${pagination.page - 1}#events`}>Previous</Link> : <span />}
             <p className="text-xs text-muted">Page {pagination.page} of {pagination.totalPages}</p>
-            {pagination.hasNextPage ? <Link className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-foreground no-underline transition hover:border-accent hover:text-accent-dark" href={`/?page=${pagination.page + 1}#events`}>Next</Link> : <span />}
+            {pagination.hasNextPage ? <Link className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-foreground no-underline transition hover:border-accent hover:text-accent-dark" href={`/?${query ? `query=${encodeURIComponent(query)}&` : ""}page=${pagination.page + 1}#events`}>Next</Link> : <span />}
           </nav>}
         </section>
       </main>

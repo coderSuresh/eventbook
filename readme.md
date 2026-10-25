@@ -19,7 +19,7 @@ Not currently included:
 - Live deployment URLs.
 - Automated backend tests.
 
-The repository includes a repeatable seed script with test accounts and sample data. Frontend search, pagination controls, booking history, and cancellation screens remain future work.
+The repository includes a repeatable seed script with test accounts and sample data. Frontend event-title search and pagination controls are available on the homepage. Booking history and cancellation screens remain future work.
 
 ## Repository Layout
 
@@ -160,7 +160,7 @@ Access tokens are sent in the `Authorization: Bearer <token>` header. The refres
 | Method | Endpoint | Auth | Purpose |
 | --- | --- | --- | --- |
 | `GET` | `/events/upcoming?page=1&pageSize=10` | Public | Return active future events and pagination metadata |
-| `GET` | `/events/search?query=...` | Public | Search active events by title |
+| `GET` | `/events/search?query=...&page=1&pageSize=10` | Public | Search upcoming active events by title with pagination |
 | `GET` | `/events/:id` | Public | Return one event |
 | `GET` | `/events?page=1&pageSize=10` | Public | Return paginated events for admin views |
 | `POST` | `/events` | Admin | Create an event |

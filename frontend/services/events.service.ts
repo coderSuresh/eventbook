@@ -34,6 +34,14 @@ export async function getUpcomingEvents(page = 1, pageSize = 10) {
     return response.data
 }
 
+export async function searchEvents(query: string, page = 1, pageSize = 10) {
+    const response = await apiClient.get<PaginatedEvents>("/events/search", {
+        params: { query, page, pageSize },
+    })
+
+    return response.data
+}
+
 export async function getEventById(id: string) {
     const response = await apiClient.get<Event>(`/events/${id}`)
 
