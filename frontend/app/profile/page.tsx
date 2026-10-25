@@ -6,7 +6,7 @@ import { Metadata } from "next"
 export async function generateMetadata(): Promise<Metadata> {
     return {
         title: "Profile",
-        description: "View your bookings and manage your profile.",
+        description: "View your past and upcoming bookings.",
     }
 }
 
