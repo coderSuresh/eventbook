@@ -1,16 +1,16 @@
-import Header from "@/components/common/header";
-import Footer from "@/components/common/footer";
-import VerifyEmailContainer from "@/components/auth/verify-email-container";
+import Header from "@/components/common/header"
+import Footer from "@/components/common/footer"
+import VerifyEmailContainer from "@/components/auth/verify-email-container"
 
 type VerifyPageProps = {
-    searchParams: Promise<{ token?: string | string[] }>;
-};
+    searchParams: Promise<{ token?: string | string[] }>
+}
 
-export const instant = false;
+export const instant = false
 
 export default async function VerifyPage({ searchParams }: VerifyPageProps) {
-    const params = await searchParams;
-    const token = params.token as string | undefined;
+    const params = await searchParams
+    const token = params.token as string | undefined
 
     return (
         <div className="flex min-h-full flex-col bg-background">
@@ -25,5 +25,5 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
             </main>
             <Footer />
         </div>
-    );
+    )
 }

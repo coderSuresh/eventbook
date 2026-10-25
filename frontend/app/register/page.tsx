@@ -1,7 +1,7 @@
-import Link from "next/link";
-import Header from "@/components/common/header";
-import Footer from "@/components/common/footer";
-import RegisterFormContainer from "@/components/auth/register-form-container";
+import Link from "next/link"
+import Header from "@/components/common/header"
+import Footer from "@/components/common/footer"
+import RegisterFormContainer from "@/components/auth/register-form-container"
 
 export default function RegisterPage() {
     return (
@@ -18,5 +18,5 @@ export default function RegisterPage() {
             </main>
             <Footer />
         </div>
-    );
+    )
 }

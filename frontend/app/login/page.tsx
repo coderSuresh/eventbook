@@ -1,7 +1,7 @@
-import Link from "next/link";
-import Header from "@/components/common/header";
-import Footer from "@/components/common/footer";
-import LoginFormContainer from "@/components/auth/login-form-container";
+import Link from "next/link"
+import Header from "@/components/common/header"
+import Footer from "@/components/common/footer"
+import LoginFormContainer from "@/components/auth/login-form-container"
 
 export default function LoginPage() {
     return (
@@ -18,5 +18,5 @@ export default function LoginPage() {
             </main>
             <Footer />
         </div>
-    );
+    )
 }

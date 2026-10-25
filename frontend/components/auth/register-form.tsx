@@ -1,26 +1,26 @@
-"use client";
+"use client"
 
-import type { ChangeEvent } from "react";
-import PasswordField from "@/components/auth/password-field";
-import type { RegisterCredentials } from "@/services/auth.service";
+import type { ChangeEvent } from "react"
+import PasswordField from "@/components/auth/password-field"
+import type { RegisterCredentials } from "@/services/auth.service"
 
 type RegisterFormProps = {
-    error: string;
-    success: string;
-    isSubmitting: boolean;
-    onSubmit: (credentials: RegisterCredentials) => Promise<void>;
-};
+    error: string
+    success: string
+    isSubmitting: boolean
+    onSubmit: (credentials: RegisterCredentials) => Promise<void>
+}
 
 export default function RegisterForm({ error, success, isSubmitting, onSubmit }: RegisterFormProps) {
     async function handleSubmit(event: ChangeEvent<HTMLFormElement>) {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget);
+        event.preventDefault()
+        const formData = new FormData(event.currentTarget)
 
         await onSubmit({
             name: String(formData.get("name")),
             email: String(formData.get("email")),
             password: String(formData.get("password")),
-        });
+        })
     }
 
     return (
@@ -40,5 +40,5 @@ export default function RegisterForm({ error, success, isSubmitting, onSubmit }:
                 {isSubmitting ? "Please wait..." : "Create account"}
             </button>
         </form>
-    );
+    )
 }

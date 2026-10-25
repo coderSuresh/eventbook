@@ -1,12 +1,12 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 export default function AdminLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-    const pathname = usePathname();
-    const isEvents = pathname.startsWith("/admin/events") || pathname === "/admin";
-    const isBookings = pathname.startsWith("/admin/bookings");
+    const pathname = usePathname()
+    const isEvents = pathname.startsWith("/admin/events") || pathname === "/admin"
+    const isBookings = pathname.startsWith("/admin/bookings")
 
     return (
         <div className="min-h-full bg-background">
@@ -22,5 +22,5 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
                 <div className="mx-auto max-w-6xl">{children}</div>
             </main>
         </div>
-    );
+    )
 }

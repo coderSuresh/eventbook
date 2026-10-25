@@ -1,20 +1,20 @@
-"use client";
+"use client"
 
-import type { ChangeEvent } from "react";
-import PasswordField from "@/components/auth/password-field";
-import type { LoginCredentials } from "@/services/auth.service";
+import type { ChangeEvent } from "react"
+import PasswordField from "@/components/auth/password-field"
+import type { LoginCredentials } from "@/services/auth.service"
 
 type LoginFormProps = {
-    error: string;
-    isSubmitting: boolean;
-    onSubmit: (credentials: LoginCredentials) => Promise<void>;
-};
+    error: string
+    isSubmitting: boolean
+    onSubmit: (credentials: LoginCredentials) => Promise<void>
+}
 
 export default function LoginForm({ error, isSubmitting, onSubmit }: LoginFormProps) {
     async function handleSubmit(event: ChangeEvent<HTMLFormElement>) {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        await onSubmit({ email: String(formData.get("email")), password: String(formData.get("password")) });
+        event.preventDefault()
+        const formData = new FormData(event.currentTarget)
+        await onSubmit({ email: String(formData.get("email")), password: String(formData.get("password")) })
     }
 
     return (
@@ -29,5 +29,5 @@ export default function LoginForm({ error, isSubmitting, onSubmit }: LoginFormPr
                 {isSubmitting ? "Please wait..." : "Log in"}
             </button>
         </form>
-    );
+    )
 }

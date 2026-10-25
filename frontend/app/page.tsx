@@ -1,14 +1,14 @@
-import Header from "@/components/common/header";
-import Footer from "@/components/common/footer";
-import UpcomingEvents from "@/components/events/upcoming-events";
-import Link from "next/link";
-import { getUpcomingEvents } from "@/services/events.service";
+import Header from "@/components/common/header"
+import Footer from "@/components/common/footer"
+import UpcomingEvents from "@/components/events/upcoming-events"
+import Link from "next/link"
+import { getUpcomingEvents } from "@/services/events.service"
 
-export const instant = false;
+export const instant = false
 
 async function loadUpcomingEvents(page: number) {
   try {
-    return await getUpcomingEvents(page, 10);
+    return await getUpcomingEvents(page, 10)
   } catch {
     return {
       data: [],
@@ -20,15 +20,15 @@ async function loadUpcomingEvents(page: number) {
         hasNextPage: false,
         hasPreviousPage: false,
       },
-    };
+    }
   }
 }
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
-  const params = await searchParams;
-  const requestedPage = Number(params.page);
-  const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-  const { data: events, pagination } = await loadUpcomingEvents(page);
+  const params = await searchParams
+  const requestedPage = Number(params.page)
+  const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
+  const { data: events, pagination } = await loadUpcomingEvents(page)
 
   return (
     <div className="flex min-h-full flex-col">
@@ -88,5 +88,5 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
 
       <Footer />
     </div>
-  );
+  )
 }

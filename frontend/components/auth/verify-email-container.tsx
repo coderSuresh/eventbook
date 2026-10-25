@@ -1,52 +1,52 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { getAuthErrorMessage, verifyEmail } from "@/services/auth.service";
+import Link from "next/link"
+import { useEffect, useRef, useState } from "react"
+import { getAuthErrorMessage, verifyEmail } from "@/services/auth.service"
 
 type VerifyEmailContainerProps = {
-    token?: string;
-};
+    token?: string
+}
 
 export default function VerifyEmailContainer({ token }: VerifyEmailContainerProps) {
-    const [error, setError] = useState(token ? "" : "This verification link is missing its token.");
-    const [message, setMessage] = useState("");
-    const [isVerifying, setIsVerifying] = useState(Boolean(token));
-    const verificationRef = useRef<ReturnType<typeof verifyEmail> | null>(null);
+    const [error, setError] = useState(token ? "" : "This verification link is missing its token.")
+    const [message, setMessage] = useState("")
+    const [isVerifying, setIsVerifying] = useState(Boolean(token))
+    const verificationRef = useRef<ReturnType<typeof verifyEmail> | null>(null)
 
     useEffect(() => {
         if (!token) {
-            return;
+            return
         }
 
-        const verification = verificationRef.current ?? (verificationRef.current = verifyEmail(token));
+        const verification = verificationRef.current ?? (verificationRef.current = verifyEmail(token))
 
-        let isCurrent = true;
+        let isCurrent = true
 
         verification
             .then((response) => {
                 if (isCurrent) {
-                    setMessage(response.message || "Your email has been verified.");
+                    setMessage(response.message || "Your email has been verified.")
                 }
             })
             .catch((verificationError: unknown) => {
                 if (isCurrent) {
-                    setError(getAuthErrorMessage(verificationError));
+                    setError(getAuthErrorMessage(verificationError))
                 }
             })
             .finally(() => {
                 if (isCurrent) {
-                    setIsVerifying(false);
+                    setIsVerifying(false)
                 }
-            });
+            })
 
         return () => {
-            isCurrent = false;
-        };
-    }, [token]);
+            isCurrent = false
+        }
+    }, [token])
 
     if (isVerifying) {
-        return <p className="mt-8 text-sm text-muted" role="status">Verifying your email...</p>;
+        return <p className="mt-8 text-sm text-muted" role="status">Verifying your email...</p>
     }
 
     return (
@@ -57,5 +57,5 @@ export default function VerifyEmailContainer({ token }: VerifyEmailContainerProp
                 Continue to login
             </Link>
         </div>
-    );
+    )
 }

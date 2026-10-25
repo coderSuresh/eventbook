@@ -1,12 +1,12 @@
-import type { Event } from "@/services/events.service";
-import BookEventButton from "./book-event-button";
+import type { Event } from "@/services/events.service"
+import BookEventButton from "./book-event-button"
 
 type EventDetailsProps = {
-    event: Event;
-};
+    event: Event
+}
 
 export default function EventDetails({ event }: EventDetailsProps) {
-    const eventDate = new Date(event.date);
+    const eventDate = new Date(event.date)
 
     return (
         <div className="mt-16 border-t border-line pt-8">
@@ -33,5 +33,5 @@ export default function EventDetails({ event }: EventDetailsProps) {
                 </p>
             )}
         </div>
-    );
+    )
 }
