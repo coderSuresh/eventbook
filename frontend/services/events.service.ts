@@ -47,3 +47,9 @@ export async function getEventById(id: string) {
 
     return response.data
 }
+
+export async function checkIfAlreadyBooked(eventId: string) {
+    const response = await apiClient.get<{ isBooked: boolean }>(`/events/checkIfAlreadyBooked/${eventId}`)
+
+    return response.data.isBooked
+}

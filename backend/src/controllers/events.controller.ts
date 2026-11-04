@@ -145,10 +145,9 @@ export class EventsController {
         }
     }
 
-    static async getEventById(req: AuthenticatedRequest, res: Response) {
+    static async getEventById(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const userId = req.user?.userId;
 
             if (typeof id !== "string" || !id.trim()) {
                 return res.status(400).json({ message: "Event not found" });
@@ -167,22 +166,6 @@ export class EventsController {
                 status: "CONFIRMED",
             }).all();
 
-            if(userId) {
-                const userBooking = await db.orm.public.Booking.where({
-                    eventId: event.id,
-                    userId: userId,
-                    status: "CONFIRMED",
-                }).first();
-                if (userBooking) {
-                    return res.status(200).json({
-                        ...event,
-                        remainingSeats: Math.max(event.totalSeats - confirmedBookings.length, 0),
-                        isUpcoming: event.isActive && new Date(event.date).getTime() >= Date.now(),
-                        userHasBooking: true,
-                    });
-                }
-            }
-
             return res.status(200).json({
                 ...event,
                 remainingSeats: Math.max(event.totalSeats - confirmedBookings.length, 0),
@@ -190,6 +173,28 @@ export class EventsController {
             });
         } catch (error) {
             console.error("Error fetching event:", error);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
+    static async checkIfAlreadyBooked(req: AuthenticatedRequest, res: Response) {
+        try {
+            const { id } = req.params;
+            const userId = req.user?.userId;
+
+            if (!userId) {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
+
+            const booking = await db.orm.public.Booking.where({
+                eventId: id as string,
+                userId,
+                status: "CONFIRMED",
+            }).first();
+
+            return res.status(200).json({ isBooked: !!booking });
+        } catch (error) {
+            console.error("Error checking booking status:", error);
             return res.status(500).json({ message: "Internal server error" });
         }
     }

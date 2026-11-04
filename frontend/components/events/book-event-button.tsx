@@ -2,11 +2,12 @@
 
 import axios from "axios"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { createBooking } from "@/services/booking.service"
 import { getAuthErrorMessage } from "@/services/auth.service"
 import { useAuth } from "@/contexts/auth.context"
 import Link from "next/link"
+import { checkIfAlreadyBooked } from "@/services/events.service"
 
 type BookEventButtonProps = {
     eventId: string
@@ -18,6 +19,15 @@ export default function BookEventButton({ eventId }: BookEventButtonProps) {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isBooked, setIsBooked] = useState(false)
     const { status } = useAuth()
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            checkIfAlreadyBooked(eventId).then((isBooked) => {
+                console.log("Booking status for event", eventId, ":", isBooked)
+                setIsBooked(isBooked)
+            })
+        }
+    }, [status, eventId])
 
     async function handleBooking() {
         setError("")
@@ -48,13 +58,19 @@ export default function BookEventButton({ eventId }: BookEventButtonProps) {
         )
     }
 
-    if(status === "unauthenticated") {
+    if (status === "unauthenticated") {
         return (
             <div className="mt-8">
                 <Link className="inline-flex rounded-full bg-accent px-6 py-4 text-sm font-semibold text-white transition hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-60" href={`/login?redirect=/events/${eventId}`}>
                     Log in to book
                 </Link>
             </div>
+        )
+    }
+
+    if (isBooked) {
+        return (
+            <p className="mt-8 text-sm font-semibold text-accent-dark">Booking confirmed</p>
         )
     }
 
