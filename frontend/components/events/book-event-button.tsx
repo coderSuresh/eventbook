@@ -28,7 +28,7 @@ export default function BookEventButton({ eventId }: BookEventButtonProps) {
             setIsBooked(true)
         } catch (bookingError) {
             if (axios.isAxiosError(bookingError) && bookingError.response?.status === 401) {
-                router.replace(`/login?redirect=/events/${eventId}/book`)
+                router.replace(`/login?redirect=/events/${eventId}`)
                 return
             }
 
