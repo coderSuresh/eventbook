@@ -5,16 +5,17 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getEventById, getUpcomingEvents } from "@/services/events.service"
 import { Metadata } from "next"
+import { cache } from "react"
 
 export const instant = false
 
-async function loadEvent(id: string) {
+const loadEvent = cache(async (id: string) => {
   try {
     return await getEventById(id)
   } catch {
     return null
   }
-}
+})
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
