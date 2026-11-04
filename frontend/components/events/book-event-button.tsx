@@ -51,7 +51,7 @@ export default function BookEventButton({ eventId }: BookEventButtonProps) {
     if(status === "unauthenticated") {
         return (
             <div className="mt-8">
-                <Link className="inline-flex rounded-full bg-accent px-6 py-4 text-sm font-semibold text-white transition hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-60" href={`/login?redirect=/events/${eventId}/book`}>
+                <Link className="inline-flex rounded-full bg-accent px-6 py-4 text-sm font-semibold text-white transition hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-60" href={`/login?redirect=/events/${eventId}`}>
                     Log in to book
                 </Link>
             </div>
